@@ -11,7 +11,7 @@ set(QUAZIP_CMAKE_DIR cmake)
 
 add_subdirectory(quazip)
 
-# export targets from installation tree
+# generate config file
 configure_file(
 	${QUAZIP_CMAKE_DIR}/${QUAZIP_CONFIG_FILENAME}.in
 	${QUAZIP_CMAKE_DIR}/${QUAZIP_CONFIG_FILENAME}
@@ -51,4 +51,3 @@ install(FILES "COPYING"
 
 # export targets from build tree
 export(EXPORT ${QUAZIP_EXPORT_NAME} FILE ${QUAZIP_CMAKE_DIR}/${QUAZIP_EXPORT_NAME}.cmake)
-export(PACKAGE ${QUAZIP_PACKAGE_NAME})
