@@ -9,7 +9,7 @@ class QuaZipConan(ConanFile):
     url = "https://github.com/vaerizk/quazip"
     homepage = "https://github.com/stachenov/quazip"
     description = "A C++ wrapper for Gilles Vollant's ZIP/UNZIP package (AKA Minizip) using Qt library"
-    topics = ("quazip", "conan")
+    topics = ("quazip", "conan-recipe")
 
     settings = {
         "os": ["Windows"],
