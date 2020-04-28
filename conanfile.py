@@ -30,7 +30,7 @@ class QuaZipConan(ConanFile):
         self.build_requires("cmake_installer/[>3.0.0]@conan/stable")
 
     def requirements(self):
-        self.requires("qt/5.13.1@bincrafters/stable", private=False)
+        self.requires("qt/5.12.8@bincrafters/stable", private=False)
         self.requires("zlib/1.2.11", private=False)
 
     def build(self):
