@@ -17,6 +17,18 @@ add_library(${QUAZIP_TARGET_NAME}
 	${QUAZIP_SOURCES}
 )
 
+if(${WIN32})
+	configure_file(quazip.rc.in quazip.rc)
+	set(QUAZIP_RESOURCES
+		${CMAKE_CURRENT_BINARY_DIR}/quazip.rc
+	)
+
+	target_sources(${QUAZIP_TARGET_NAME}
+		PRIVATE
+			${QUAZIP_RESOURCES}
+	)
+endif()
+
 set_target_properties(${QUAZIP_TARGET_NAME} PROPERTIES
 	DEBUG_POSTFIX d
 )
@@ -79,7 +91,7 @@ install(FILES ${QUAZIP_HEADERS}
 
 # group source files for IDE source explorers (e.g. Visual Studio)
 source_group("Header Files" FILES
-	${QUAZIP_HEADERS}	
+	${QUAZIP_HEADERS}
 )
 source_group("Source Files" FILES
 	${QUAZIP_SOURCES}
