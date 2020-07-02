@@ -7,7 +7,7 @@ class QuaZipTestConan(ConanFile):
     generators = "cmake_paths"
 
     def build_requirements(self):
-        self.build_requires("cmake_installer/[>3.0.0]@conan/stable")
+        self.build_requires("cmake/[>3.0.0]")
 
     def build(self):
         cmake = CMake(self)
