@@ -1,6 +1,7 @@
 from conans import ConanFile, CMake, tools
-
+from conans.errors import ConanInvalidConfiguration
 import os.path
+
 
 class QuaZipConan(ConanFile):
     name = "quazip"
@@ -11,20 +12,20 @@ class QuaZipConan(ConanFile):
     description = "A C++ wrapper for Gilles Vollant's ZIP/UNZIP package (AKA Minizip) using Qt library"
     topics = ("quazip", "conan-recipe")
 
-    settings = {
-        "os": ["Windows"],
-        "compiler": None,
-        "build_type": None,
-        "arch": None
-    }
+    settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
     default_options = {
         "shared": True,
         "zlib:shared": False
     }
+
     generators = "cmake_paths"
     exports_sources = "*"
     no_copy_source = True
+
+    def configure(self):
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("Only windows is supported at the moment")
 
     def build_requirements(self):
         self.build_requires("cmake/[>3.0.0]")
