@@ -1,65 +1,42 @@
-cmake_minimum_required(VERSION 2.6)
-project(QuaZip)
+cmake_minimum_required(VERSION 3.0)
 
-# CMP0042: Explicitly acknowledge MACOSX_RPATH
-# (introduced in CMake 2.8.12, enabled by default in CMake 3.0,
-# and producing a warning when unset since 3.7.1)
-cmake_policy(SET CMP0042 NEW)
+project(quazip VERSION ${VERSION} LANGUAGES C CXX)
 
-set(QUAZIP_LIB_VERSION 0.9.1)
-set(QUAZIP_LIB_SOVERSION 1)
-
-option(BUILD_WITH_QT4 "Build QuaZip with Qt4 no matter if Qt5 was found" OFF)
-
-if(NOT BUILD_WITH_QT4)
-    # try Qt5 first, and prefer that if found
-    find_package(Qt5Core QUIET)
-endif()
-
-if(Qt5Core_FOUND)
-    set(CMAKE_CXX_STANDARD 11)
-    set(QTCORE_LIBRARIES ${Qt5Core_LIBRARIES})
-    set(QUAZIP_LIB_VERSION_SUFFIX 5)
-    # if there is no QT_ROOT, try to deduce it from Qt QtCore include
-    if("${QT_ROOT}" STREQUAL "")
-        set(QT_ROOT ${QT_QTCORE_INCLUDE_DIR}/../..)
-    endif()
-    include_directories(${Qt5Core_INCLUDE_DIRS})
-
-    macro(qt_wrap_cpp)
-        qt5_wrap_cpp(${ARGN})
-    endmacro()
-else()
-    set(qt_min_version "4.5.0")
-    find_package(Qt4 REQUIRED)
-    set(QT_USE_QTGUI false)
-    include(${QT_USE_FILE})
-    include_directories(${QT_INCLUDES})
-    set(QTCORE_LIBRARIES ${QT_QTCORE_LIBRARY})
-
-    macro(qt_wrap_cpp)
-        qt4_wrap_cpp(${ARGN})
-    endmacro()
-endif()
-
-# Use system zlib on unix and Qt ZLIB on Windows
-find_package(ZLIB REQUIRED)
-
-# All build libraries are moved to this directory
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-
-set(LIB_SUFFIX "" CACHE STRING "Define suffix of directory name (32/64)")
-set(LIB_DESTINATION "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" CACHE STRING "Library directory name" FORCE)
-set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig" CACHE STRING "Installation directory for pkgconfig (.pc) files" FORCE)
-set(QUAZIP_LIB_TARGET_NAME quazip${QUAZIP_LIB_VERSION_SUFFIX} CACHE
-    INTERNAL "Target name of libquazip" FORCE)
+# project variables
+set(QUAZIP_PACKAGE_NAME ${PROJECT_NAME})
+set(QUAZIP_EXPORT_NAME ${QUAZIP_PACKAGE_NAME}-targets)
+set(QUAZIP_CONFIG_FILENAME ${QUAZIP_PACKAGE_NAME}-config.cmake)
+set(QUAZIP_CONFIGVERSION_FILENAME ${QUAZIP_PACKAGE_NAME}-config-version.cmake)
+set(QUAZIP_CMAKE_DIR cmake)
 
 add_subdirectory(quazip)
 
-if(UNIX AND NOT APPLE)
-	configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/quazip.pc.cmakein
-			${CMAKE_CURRENT_BINARY_DIR}/quazip.pc @ONLY)
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/quazip.pc DESTINATION "${INSTALL_PKGCONFIG_DIR}")
-endif()
+# generate config file
+configure_file(
+	"${QUAZIP_CMAKE_DIR}/${QUAZIP_CONFIG_FILENAME}.in"
+	"${QUAZIP_CMAKE_DIR}/${QUAZIP_CONFIG_FILENAME}"
+	@ONLY
+)
 
-install(FILES QuaZipConfig.cmake DESTINATION ${LIB_DESTINATION}/cmake/QuaZip${QUAZIP_LIB_VERSION_SUFFIX} RENAME QuaZip${QUAZIP_LIB_VERSION_SUFFIX}Config.cmake)
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("${QUAZIP_CMAKE_DIR}/${QUAZIP_CONFIGVERSION_FILENAME}"
+	COMPATIBILITY SameMinorVersion # TODO: when quazip is released compatibility should be revised
+)
+
+# install config and config-version files
+install(FILES
+	"${PROJECT_BINARY_DIR}/${QUAZIP_CMAKE_DIR}/${QUAZIP_CONFIG_FILENAME}"
+	"${PROJECT_BINARY_DIR}/${QUAZIP_CMAKE_DIR}/${QUAZIP_CONFIGVERSION_FILENAME}"
+	DESTINATION "lib/${QUAZIP_CMAKE_DIR}/${QUAZIP_PACKAGE_NAME}"
+)
+# export targets from an installation tree
+install(EXPORT ${QUAZIP_EXPORT_NAME}
+	DESTINATION "lib/${QUAZIP_CMAKE_DIR}/${QUAZIP_PACKAGE_NAME}"
+)
+
+install(FILES "COPYING"
+	DESTINATION licenses
+)
+
+# export targets from a build tree
+export(EXPORT ${QUAZIP_EXPORT_NAME} FILE "${QUAZIP_CMAKE_DIR}/${QUAZIP_EXPORT_NAME}.cmake")
